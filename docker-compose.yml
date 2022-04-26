@@ -1,0 +1,14 @@
+services:
+
+  node:
+    image: node
+    user: "node"
+    env_file:
+      - .env
+    build:
+      context: ./node
+      dockerfile: ./node.Dockerfile
+    volumes:
+      - ./node/app.js:/home/node/app/app.js
+      - ./node/src:/home/node/app/src
+      - ./node/package.json:/home/node/app/package.json

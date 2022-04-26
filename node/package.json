@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+      "signalr-client": "^0.0.20",
+      "zlib": "^1.0.5"
+    },
+    "name": "app",
+    "version": "1.0.0",
+    "main": "index.js",
+    "devDependencies": {},
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Luke Pereyra",
+    "license": "ISC",
+    "description": ""
+  }
