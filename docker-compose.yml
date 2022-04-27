@@ -1,7 +1,6 @@
 services:
 
   node:
-    image: node
     user: "node"
     env_file:
       - .env
@@ -12,3 +11,5 @@ services:
       - ./node/app.js:/home/node/app/app.js
       - ./node/src:/home/node/app/src
       - ./node/package.json:/home/node/app/package.json
+    ports:
+      - '3000:3000'

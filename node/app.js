@@ -1,4 +1,11 @@
-const {initialize, orderBooks} = require('./src/orderBook');
+const {initialize, orderBooks} = require('./src/services/orderBookStream');
+const express = require('express');
+const router = express.Router();
+
+const routes = require('./src/routes');
+
+const port = process.env.PORT;
+const app = express();
 
 const currencies = [
   'BTC-USD',
@@ -15,4 +22,13 @@ currencies.forEach(pair => {
   }, 5000);
 })
 
+app.get('/', (req, res) => {
+  res.send('Hello World from Express!');
+});
 
+app.use('/api', routes(router));
+
+
+app.listen(port, () => {
+  console.log(`Trading API listening on port ${port}...`);
+});

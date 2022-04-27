@@ -2,10 +2,12 @@ FROM node
 
 WORKDIR /home/node/app
 
-COPY index.js index.js
-
-# COPY package.json package.json
+COPY *.js .
+COPY *.json .
+COPY ./src .
 
 RUN npm install
 
 USER node
+
+CMD npm start

@@ -1,16 +1,17 @@
 {
     "dependencies": {
-      "signalr-client": "^0.0.20",
-      "zlib": "^1.0.5"
+        "express": "^4.18.0",
+        "signalr-client": "^0.0.20",
+        "zlib": "^1.0.5"
     },
     "name": "app",
     "version": "1.0.0",
-    "main": "index.js",
-    "devDependencies": {},
+    "main": "app.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node app.js"
     },
     "author": "Luke Pereyra",
     "license": "ISC",
     "description": ""
-  }
+}
