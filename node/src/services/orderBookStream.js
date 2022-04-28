@@ -8,7 +8,7 @@
 const signalR = require('signalr-client');
 const zlib = require('zlib');
 
-const STREAM_URL = 'wss://socket-v3.bittrex.com/signalr';
+const STREAM_URL = process.env.STREAM_URL;
 const HUB = ['c3'];
 
 var client;
@@ -16,8 +16,8 @@ var resolveInvocationPromise = () => { };
 
 const orderBooks = [];
 
-async function initialize(currencies, depth) {
-  currencies.forEach(pair => {
+async function initialize(tradingPairs, depth) {
+  tradingPairs.forEach(pair => {
     orderBooks.push({
       pair,
       ask: [],
@@ -26,7 +26,7 @@ async function initialize(currencies, depth) {
   });
 
   client = await connect();
-  await subscribe(client, currencies, depth);
+  await subscribe(client, tradingPairs, depth);
 }
 
 async function connect() {
@@ -44,8 +44,8 @@ const scanRatesFromUpdate = deltas => {
   const ratesToRemove = [];
   const ratesToAdd = [];
   for (const delta of deltas) {
-    ratesToRemove.push(delta.rate);
-    if (delta.quantity > 0) {
+    ratesToRemove.push(delta.rate); // remove all deltas that will be overwritten
+    if (delta.quantity > 0) { // deltas with quantity = 0 mean that no longer belong to this orderbook's depth
       ratesToAdd.push(delta);
     }
   }
@@ -56,29 +56,29 @@ function updateOrderBook(orderUpdate) {
   const currentBook = orderBooks.find(book => book.pair === orderUpdate.marketSymbol);
 
   const bidRates = scanRatesFromUpdate(orderUpdate.bidDeltas);
-  
+
   const newBids = [
     ...currentBook.bid.filter(bid => !bidRates[0].includes(bid.rate)),
     ...bidRates[1]
-  ].sort((delta1, delta2) => +(delta1.rate) - +(delta2.rate))
+  ].sort((delta1, delta2) => +(delta2.rate) - +(delta1.rate)); // sort bid rates DESC
 
   currentBook.bid = newBids;
 
   const askRates = scanRatesFromUpdate(orderUpdate.askDeltas);
-  
+
   const newAsks = [
     ...currentBook.ask.filter(bid => !askRates[0].includes(bid.rate)),
     ...askRates[1]
-  ].sort((delta1, delta2) => +(delta2.rate) - +(delta1.rate));
+  ].sort((delta1, delta2) => +(delta1.rate) - +(delta2.rate)); // sort ask rates ASC
 
   currentBook.ask = newAsks;
 }
 
 
-async function subscribe(client, currencies, depth) {
+async function subscribe(client, tradingPairs, depth) {
   const channels = [
     'heartbeat',
-    ...currencies.map(
+    ...tradingPairs.map(
       tradingPair => `orderbook_${tradingPair}_${depth}`
     )
   ];
@@ -107,6 +107,9 @@ async function invoke(client, method, ...args) {
   });
 }
 
+
+
+
 function messageReceived(message) {
   const data = JSON.parse(message.utf8Data);
 
@@ -129,15 +132,14 @@ function messageReceived(message) {
           const json = JSON.parse(inflated.toString('utf8'));
 
           if (m.M == 'orderBook') {
-            // console.log(json);
-            updateOrderBook(json);
+            updateOrderBook(json); // listen to 'order book updated' event
           }
         });
       }
       else if (m.M == 'heartbeat') {
         console.log('We\'re still connected...');
       }
-      
+
     });
   }
 }
